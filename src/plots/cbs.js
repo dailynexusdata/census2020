@@ -1,11 +1,10 @@
 import * as d3 from 'd3';
 
 const makePlot = (mapData, data) => {
-  const container = d3.select('#census-cbgs2020');
+  const container = d3.select('#census-cbs2020');
   container.selectAll('*').remove();
 
-  container.append('h1').text('Census Block Groups');
-
+  container.append('h1').text('Census Blocks');
   const size = { height: 400, width: 525 };
   const legend = container
     .append('div')
@@ -20,7 +19,9 @@ const makePlot = (mapData, data) => {
 
   container
     .append('div')
-    .html('<p>Source: <a href="https://www.google.com">here</a></p>');
+    .html(
+      '<p>Source: <a href="https://www.google.com">my big fucking brain</a></p>',
+    );
 
   const projection = d3
     .geoMercator()
@@ -55,11 +56,10 @@ const makePlot = (mapData, data) => {
   };
 
   const inCity = (prop) => {
-    console.log(prop);
-    if (prop.GEOID === '060839803001') {
+    if (['980300'].includes(prop.TRACTCE20)) {
       return 'sb';
     }
-    if (['002936', '002926', '002924'].includes(prop.TRACTCE)) {
+    if (['002936', '002926', '002924'].includes(prop.TRACTCE20)) {
       return 'iv';
     }
 
@@ -72,7 +72,7 @@ const makePlot = (mapData, data) => {
     goleta: 'Goleta',
   };
 
-  const cbgs = svg
+  const cbs = svg
     .append('svg')
     .selectAll('path')
     .data(mapData.features)
@@ -94,7 +94,7 @@ const makePlot = (mapData, data) => {
   // .style('left', '20px')
   // .style('top', '50px');
 
-  cbgs.on('mousemove', (event, d) => {
+  cbs.on('mousemove', (event, d) => {
     const [mouseX, mouseY] = d3.pointer(event);
 
     tooltip.style('display', 'block');
@@ -110,7 +110,7 @@ const makePlot = (mapData, data) => {
     // console.log(pt);
   });
 
-  cbgs.on('mouseleave', () => {
+  cbs.on('mouseleave', () => {
     tooltip.style('display', 'none');
   });
 
@@ -129,8 +129,6 @@ const makePlot = (mapData, data) => {
         .style('width', '20px');
       entry.append('p').text(label).style('margin-left', '5px');
     });
-
-  console.log(mapData.features.map((d) => d.properties.GEOID));
 };
 
 export default makePlot;

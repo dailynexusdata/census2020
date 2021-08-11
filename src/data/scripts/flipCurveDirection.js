@@ -2,7 +2,7 @@ const turf = require('@turf/turf');
 const fs = require('fs');
 
 const data = JSON.parse(
-  fs.readFileSync('../../../dist/data/iv2020 (1).json', 'utf-8'),
+  fs.readFileSync('../../../dist/data/ivblocks.json', 'utf-8'),
 );
 
 const newData = {
@@ -18,4 +18,7 @@ const newData = {
   })),
 };
 
-fs.writeFileSync('../../../dist/data/iv.json', JSON.stringify(newData));
+fs.writeFileSync(
+  '../../../dist/data/ivblocks_rev.json',
+  JSON.stringify(newData),
+);
