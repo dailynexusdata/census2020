@@ -1,10 +1,10 @@
 import * as d3 from 'd3';
 
 const makePlot = (mapData, data) => {
-  const container = d3.select('#census-cbs2020');
+  const container = d3.select('#census-cbs2010');
   container.selectAll('*').remove();
 
-  container.append('h1').text('IV and UCSB Demographics 2020');
+  container.append('h1').text('IV and UCSB Demographics 2010');
   container.append('p').text('Race alone');
   const size = {
     height: Math.min(350, window.innerWidth - 40 * 2),
@@ -42,7 +42,7 @@ const makePlot = (mapData, data) => {
   container
     .append('div')
     .html(
-      '<p>Source: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.2020.html#P1">United States 2020 Census Redistricting</a></p>',
+      '<p>Source: <a href="https://www2.census.gov/census_2010/01-Redistricting_File--PL_94-171/">United States 2010 Census Redistricting</a></p>',
     );
 
   const proj = d3
@@ -78,13 +78,13 @@ const makePlot = (mapData, data) => {
   //   return;
 
   const colors = {
-    ucsb: '#76b7b2',
+    sb: '#76b7b2',
     iv: '#4e79a7',
     goleta: '#f28e2c66',
   };
 
   const cityLabs = {
-    ucsb: 'UCSB',
+    sb: 'UCSB',
     iv: 'Isla Vista',
     goleta: 'Goleta',
   };
@@ -110,31 +110,25 @@ const makePlot = (mapData, data) => {
   // .style('left', '20px')
   // .style('top', '50px');
 
-  const raceLabels = {
-    white: 'White',
-    black: 'Black',
-    asian: 'Asian',
-    other: 'Other',
-    more2: '≥2 races',
-    hisp: 'Hispanic',
-  };
-
   cbs
     .filter((d) => d.properties.city !== 'goleta')
     .on('mousemove', function (event, d) {
       d3.select(this).attr('stroke-width', 3);
+
       const [mouseX, mouseY] = d3.pointer(event);
 
       const cityName = cityLabs[d.properties.city];
+
       const width = 140;
-      const k = `06083${d.properties.TRACTCE20}${d.properties.BLOCKCE20}`;
+      const k = `06083${d.properties.TRACTCE10}${d.properties.BLOCKCE10}`;
       const pt = data.find((d) => d.fips === k);
 
       const makeToolTipLabel = (lab, val) => {
         if (val === 'NA') {
           return '';
         }
-        const title = lab === 'pop' ? 'Population' : raceLabels[lab];
+        const title =
+          lab === 'pop' ? 'Population' : lab[0].toUpperCase() + lab.slice(1);
         return `<p style="font-size:10pt">${title}: ${
           lab === 'pop' ? val : `${Math.round(val * 100) / 100}%`
         }</p>`;
@@ -181,9 +175,9 @@ const makePlot = (mapData, data) => {
       case 'white':
         return [0, 1];
       case 'asian':
-        return [0, 1];
+        return [0, 0.4];
       case 'black':
-        return [0, 0.25];
+        return [0, 0.2];
       case 'other':
         return [0, 0.5];
       default:
@@ -284,7 +278,7 @@ const makePlot = (mapData, data) => {
         .transition()
         .duration(1000)
         .attr('fill', (d1) => {
-          const k = `06083${d1.properties.TRACTCE20}${d1.properties.BLOCKCE20}`;
+          const k = `06083${d1.properties.TRACTCE10}${d1.properties.BLOCKCE10}`;
           const pt = data.find((d2) => d2.fips === k);
 
           if (pt[d.toLowerCase()] === 'NA' || d1.properties.city === 'goleta') {
@@ -318,6 +312,47 @@ const makePlot = (mapData, data) => {
   //   .attr('cy', campusPoint[1])
   //   .attr('r', 4);
 
+  const annotation = svg.append('g');
+  const endIV = projection([-119.8743, 34.40869]);
+  annotation
+    .append('circle')
+    .attr('cx', endIV[0])
+    .attr('cy', endIV[1])
+    .attr('r', 4);
+  const endIVyOffset = 15;
+  annotation
+    .append('line')
+    .attr('x1', endIV[0])
+    .attr('x2', endIV[0])
+    .attr('y2', endIV[1] + endIVyOffset)
+    .attr('y1', endIV[1])
+    .style('stroke-dasharray', '1, 2')
+    .style('stroke', 'black');
+
+  annotation
+    .append('text')
+    .text('This region contains 385 people')
+    .attr('alignment-baseline', 'hanging')
+    .style('font-size', '12px')
+    .attr('x', endIV[0] - 5)
+    .attr('y', endIV[1] + endIVyOffset + 2);
+
+  annotation
+    .append('text')
+    .text('from West Campus Housing and')
+    .attr('alignment-baseline', 'hanging')
+    .style('font-size', '12px')
+    .attr('x', endIV[0] - 5)
+    .attr('y', endIV[1] + endIVyOffset + 2 + 12);
+
+  annotation
+    .append('text')
+    .text('20 from IV.')
+    .attr('alignment-baseline', 'hanging')
+    .style('font-size', '12px')
+    .attr('x', endIV[0] - 5)
+    .attr('y', endIV[1] + endIVyOffset + 2 + 24);
+
   const margin = {
     top: 50,
     left: 5,
@@ -344,63 +379,71 @@ const makePlot = (mapData, data) => {
     more2: '#e15759',
   };
 
+  const raceLabels = {
+    white: 'White',
+    black: 'Black',
+    asian: 'Asian',
+    other: 'Other',
+    more2: '≥2 races',
+  };
+
   const barData = [
     {
       x1: 0,
-      x2: 0.482,
+      x2: 0.669,
       y: 'iv',
       name: 'white',
     },
     {
-      x1: 0.482,
-      x2: 0.5041,
+      x1: 0.669,
+      x2: 0.6886,
       y: 'iv',
       name: 'black',
     },
     {
-      x1: 0.5041,
-      x2: 0.7131,
+      x1: 0.6886,
+      x2: 0.7082,
       y: 'iv',
       name: 'asian',
     },
     {
-      x1: 0.7131,
-      x2: 0.8401,
+      x1: 0.7082,
+      x2: 0.8372,
       y: 'iv',
       name: 'other',
     },
     {
-      x1: 0.8401,
+      x1: 0.8372,
       x2: 1,
       y: 'iv',
       name: 'more2',
     },
     {
       x1: 0,
-      x2: 0.459,
+      x2: 0.6,
       y: 'ucsb',
       name: 'white',
     },
     {
-      x1: 0.459,
-      x2: 0.4715,
+      x1: 0.6,
+      x2: 0.6367,
       y: 'ucsb',
       name: 'black',
     },
     {
-      x1: 0.4715,
-      x2: 0.8485,
+      x1: 0.6367,
+      x2: 0.8347,
       y: 'ucsb',
       name: 'asian',
     },
     {
-      x1: 0.8485,
-      x2: 0.9276,
+      x1: 0.8347,
+      x2: 0.9275,
       y: 'ucsb',
       name: 'other',
     },
     {
-      x1: 0.9276,
+      x1: 0.9275,
       x2: 1,
       y: 'ucsb',
       name: 'more2',
@@ -494,4 +537,5 @@ const makePlot = (mapData, data) => {
     selectMapOption(event.target, d);
   });
 };
+
 export default makePlot;

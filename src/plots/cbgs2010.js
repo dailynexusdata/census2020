@@ -2,9 +2,7 @@ import * as d3 from 'd3';
 import { getTextWidth } from './utility';
 
 const makePlot = (mapData, data) => {
-  console.log(data);
-
-  const container = d3.select('#census-cbgs2020');
+  const container = d3.select('#census-cbgs2010');
   container.selectAll('*').remove();
 
   container.append('h1').text('Census Block Groups');
@@ -63,11 +61,13 @@ const makePlot = (mapData, data) => {
   };
 
   const inCity = (prop) => {
-    // console.log(prop);
-    if (prop.GEOID === '060839803001') {
+    if (['060830029221', '060830029223'].includes(prop.GEOID10)) {
       return 'sb';
     }
-    if (['002936', '002926', '002924'].includes(prop.TRACTCE)) {
+    if (
+      ['002936', '002926', '002924'].includes(prop.TRACTCE10) ||
+      prop.GEOID10 === '060830029282'
+    ) {
       return 'iv';
     }
 
@@ -102,10 +102,10 @@ const makePlot = (mapData, data) => {
   // .style('left', '20px')
   // .style('top', '50px');
 
-  cbgs.on('mousemove', (event, d) => {
+  cbgs.on('mousemove', (event, dat) => {
     const [mouseX, mouseY] = d3.pointer(event);
 
-    const cityName = cityLabs[inCity(d.properties)];
+    const cityName = cityLabs[inCity(dat.properties)];
 
     const width =
       2 * 10 +
@@ -118,11 +118,10 @@ const makePlot = (mapData, data) => {
       .style('left', `${Math.min(mouseX, size.width - width)}px`)
       .style('top', `${mouseY}px`);
 
-    const k = `${d.properties.TRACTCE}${d.properties.BLKGRPCE}`;
-    // console.log(+k, data);
-    const pt = data.find((d) => d.fips === +k);
-
-    // console.log(pt);
+    console.log(dat);
+    const pt = data.find((d) => d.fips === dat.properties.GEOID10);
+    console.log(data);
+    console.log(pt);
   });
 
   cbgs.on('mouseleave', () => {
@@ -145,7 +144,7 @@ const makePlot = (mapData, data) => {
       entry.append('p').text(label).style('margin-left', '5px');
     });
 
-  console.log(mapData.features.map((d) => d.properties.GEOID));
+  console.log(data);
 };
 
 export default makePlot;
