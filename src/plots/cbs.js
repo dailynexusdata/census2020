@@ -117,6 +117,7 @@ const makePlot = (mapData, data) => {
     other: 'Other',
     more2: '≥2 races',
     hisp: 'Hispanic',
+    cities: 'Cities',
   };
 
   cbs
@@ -139,6 +140,8 @@ const makePlot = (mapData, data) => {
           lab === 'pop' ? val : `${Math.round(val * 100) / 100}%`
         }</p>`;
       };
+
+      pt.more2 = 100 - (+pt.asian + +pt.black + +pt.other + +pt.white);
 
       tooltip.style('display', 'block');
       tooltip
@@ -174,7 +177,7 @@ const makePlot = (mapData, data) => {
     entry.append('p').text(label).style('margin-left', '5px');
   });
 
-  const mapOptions = ['Cities', 'White', 'Black', 'Asian', 'Other'];
+  const mapOptions = ['cities', 'white', 'black', 'asian', 'other', 'hisp'];
 
   const getDomain = (d) => {
     switch (d.toLowerCase()) {
@@ -200,6 +203,8 @@ const makePlot = (mapData, data) => {
         return d3.interpolatePurples;
       case 'other':
         return d3.interpolateGreys;
+      case 'hisp':
+        return d3.interpolateYlOrRd;
       default:
         return [0, 1];
     }
@@ -208,7 +213,7 @@ const makePlot = (mapData, data) => {
   const selectMapOption = (event, d) => {
     selector.selectAll('*').style('background-color', 'white');
     d3.select(event).style('background-color', '#d3d3d344');
-    legend.style('display', d === 'Cities' ? 'flex' : 'none');
+    legend.style('display', d === 'cities' ? 'flex' : 'none');
     svg.selectAll('.raceBarLabels').attr('fill-opacity', 0);
     scaleContainer.selectAll('*').remove();
 
@@ -216,7 +221,7 @@ const makePlot = (mapData, data) => {
       .selectAll(`#census2020-raceLabel-${d.toLowerCase()}`)
       .attr('fill-opacity', 1);
 
-    if (d === 'Cities') {
+    if (d === 'cities') {
       cbs
         .transition()
         .duration(1000)
@@ -290,9 +295,15 @@ const makePlot = (mapData, data) => {
           if (pt[d.toLowerCase()] === 'NA' || d1.properties.city === 'goleta') {
             return '#00000000';
           }
-
-          return colScale.domain(dom)(+pt[d.toLowerCase()] / 100);
+          return colScale(+pt[d.toLowerCase()] / 100);
         });
+    }
+    if (d.toLowerCase() === 'hisp') {
+      svg.selectAll('.census2020-barOptions-race').attr('fill-opacity', 0);
+      svg.selectAll('.census2020-barOptions-eth').attr('fill-opacity', 1);
+    } else {
+      svg.selectAll('.census2020-barOptions-race').attr('fill-opacity', 1);
+      svg.selectAll('.census2020-barOptions-eth').attr('fill-opacity', 0);
     }
   };
 
@@ -301,14 +312,14 @@ const makePlot = (mapData, data) => {
     .data(mapOptions)
     .enter()
     .append('div')
-    .text((d) => d)
+    .text((d) => raceLabels[d])
     .style('padding', '5px 10px')
     .style('border', '1px solid #d3d3d3')
     .style('border-radius', '10px')
     .style('margin', '5px')
     .style('cursor', 'pointer')
     .style('background-color', (d) =>
-      d === 'Cities' ? '#d3d3d344' : '#ffffff',
+      d === 'cities' ? '#d3d3d344' : '#ffffff',
     );
 
   // const campusPoint = projection([-119.8444, 34.40416]);
@@ -342,6 +353,8 @@ const makePlot = (mapData, data) => {
     asian: '#59a14f',
     other: '#B0B0B0',
     more2: '#e15759',
+    hisp: 'red',
+    nothisp: 'orange',
   };
 
   const barData = [
@@ -405,6 +418,30 @@ const makePlot = (mapData, data) => {
       y: 'ucsb',
       name: 'more2',
     },
+    {
+      x1: 0,
+      x2: 0.727,
+      y: 'iv',
+      name: 'nothisp',
+    },
+    {
+      x1: 0.727,
+      x2: 1,
+      y: 'iv',
+      name: 'hisp',
+    },
+    {
+      x1: 0,
+      x2: 0.809,
+      y: 'ucsb',
+      name: 'nothisp',
+    },
+    {
+      x1: 0.809,
+      x2: 1,
+      y: 'ucsb',
+      name: 'hisp',
+    },
   ];
 
   // svg
@@ -444,6 +481,11 @@ const makePlot = (mapData, data) => {
     .join((enter) => {
       enter
         .append('rect')
+        .attr(
+          'class',
+          (d) =>
+            `census2020-barOptions-${d.name.includes('hisp') ? 'eth' : 'race'}`,
+        )
         .attr('x', (d) => x(d.x1))
         .attr('width', (d) => x(d.x2) - x(d.x1))
         .attr('y', (d) => y(d.y))
@@ -475,6 +517,7 @@ const makePlot = (mapData, data) => {
         )
         .attr('fill-opacity', (d) => (d.name === 'more2' ? 1 : 0));
     });
+  svg.selectAll('.census2020-barOptions-eth').attr('fill-opacity', 0);
 
   let i = 0;
   const playButtonInterval = setInterval(() => {
