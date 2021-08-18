@@ -150,6 +150,10 @@ text.split('\n').forEach((d, i) => {
   const pop100 = d.slice(318, 318 + 9);
   const hu100 = d.slice(327, 327 + 9);
 
+  if (!+tract && !+block && !+blockgroup && +geoid === 6083) {
+    console.log('COUNTY LOGREC', logrecno, geoid);
+  }
+
   //   console.log(geoid, `.${blockgroup}.`, `.${block}.`);
   if (!geoids.includes(geoid)) {
     return;
@@ -168,13 +172,13 @@ text.split('\n').forEach((d, i) => {
   });
 });
 
-console.log(output, output.length, [...new Set(geoids)].length);
+// console.log(output, output.length, [...new Set(geoids)].length);
 
 const logrecnos = output.map((d) => +d.logrecno);
 
 // copy into r dataframe
-console.log(`c(${logrecnos.join(',')})`);
-console.log(`c('${output.map((d) => d.geoid).join("','")}')`);
+// console.log(`c(${logrecnos.join(',')})`);
+// console.log(`c('${output.map((d) => d.geoid).join("','")}')`);
 // console.log(
 //   output.map((d) => ({ hu: d.hu100, pop: d.pop100, geoid: d.geoid })),
 // );

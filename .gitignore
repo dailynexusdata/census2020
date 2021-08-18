@@ -14,6 +14,8 @@ tl_20*
 ivblocks_rev.json
 *.pl
 sb2010.*
+.Rhistory
+.RData
 iv2010_rev.json
 iv.json
 iv2020.json

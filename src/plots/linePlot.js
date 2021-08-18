@@ -77,6 +77,7 @@ const makePlot = (data) => {
         .append('path')
         .attr('d', (d) => line(d.values))
         .attr('stroke', (d) => raceColors[d.key])
+        .attr('stroke-opacity', (d) => (d.values[0].where === 'sb' ? 0.4 : 1))
         .attr('stroke-width', 2);
 
       enter
@@ -87,6 +88,7 @@ const makePlot = (data) => {
         .attr('alignment-baseline', 'middle')
         .attr('font-size', '14pt')
         .attr('fill', (d) => raceColors[d.key])
+        .attr('fill-opacity', (d) => (d.values[0].where === 'sb' ? 0.4 : 1))
         .attr('y', (d) => y(d.values[1].val));
 
       enter
@@ -96,6 +98,7 @@ const makePlot = (data) => {
         .attr('alignment-baseline', 'middle')
         .attr('font-size', '14pt')
         .attr('fill', (d) => raceColors[d.key])
+        .attr('fill-opacity', (d) => (d.values[0].where === 'sb' ? 0.4 : 1))
         .attr('y', (d) => y(d.values[0].val));
     });
 };
