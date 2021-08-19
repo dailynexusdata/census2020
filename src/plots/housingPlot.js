@@ -5,7 +5,9 @@ const housingPlot = (unsortedData) => {
    * TODO: Sort the data by the pct in decreasing order,
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
    */
-  const data = unsortedData;
+  const sortedData = unsortedData.sort(function(a, b) {
+    return a.pct - b.pct;
+  });
 
   const container = d3.select('#census-housingplot');
 
@@ -23,8 +25,8 @@ const housingPlot = (unsortedData) => {
   // add more margin to give it space and see what happens
   const margin = {
     top: 10,
-    right: 10,
-    bottom: 30,
+    right: 15,
+    bottom: 39,
     left: 10,
   };
 
@@ -51,7 +53,7 @@ const housingPlot = (unsortedData) => {
   */
   const y = d3
     .scaleBand()
-    .domain(data.map((d) => d.where))
+    .domain(sortedData.map((d) => d.where))
     .range([size.height - margin.bottom, margin.top]);
 
   const x = d3
@@ -92,20 +94,21 @@ const housingPlot = (unsortedData) => {
 
   console.log(d3.scaleOrdinal(d3.schemeTableau10));
 
-  const places = svg.selectAll('places').data(data).join('g');
+  const places = svg.selectAll('places').data(sortedData).join('g');
 
   places
     .append('rect')
     .attr('x', (d) => (d.pct < 0 ? x(d.pct) : x(0)))
     .attr('y', (d) => y(d.where))
     .attr('height', 20)
-    .attr('width', (d) => Math.abs(x(d.pct) - x(0)));
+    .attr('width', (d) => Math.abs(x(d.pct) - x(0)))
+    .attr('fill', (d) => colors[d.where])
   // add a 'fill' attr to the bars to color them with the `colors` object ^
 
   // attributes can take either a value, like above I pass in 20 for the height
   // or a funcion:
 
-  // You'll see functions done a few ways in JS, just stick with these:
+  // You'll see functionsx done a few ways in JS, just stick with these:
 
   // for short functions that just return a value, use arrow notation:
   // this takes an argument `a` and returns the square
@@ -126,8 +129,9 @@ const housingPlot = (unsortedData) => {
     .attr('x', (d) => x(d.pct) + (d.pct > 0 ? 3 : -3))
     .attr('y', (d) => y(d.where) + 11) // y(d.where) is where the bar starts then add 10 for half of the bar height -- add 1 more just cause
     .attr('alignment-baseline', 'middle') // vertical alignment
-    .attr('text-anchor', (d) => (d.pct > 0 ? 'start' : 'end')); // horizontal anchor of text
-  // add a fill the same as above ^
+    .attr('text-anchor', (d) => (d.pct > 0 ? 'start' : 'end')) // horizontal anchor of text
+    .attr('fill', (d) => colors[d.where]);
+    // add a fill the same as above ^
 
   // this is called a ternary operator:
   // (condition ? value-if-true : value-if-false)
@@ -141,6 +145,15 @@ const housingPlot = (unsortedData) => {
   // If the percentage is positive, I want to move the text to the right for extra space
   // So the ternary operator returns a 3
   // if the pct is negative, I want to move the text left so it returns a -3
+
+  places
+    .append('text')
+    .text((d) => d.where)
+    .attr('x', (d) => x(0) + (d.pct > 0 ? -3 : 3))
+    .attr('y', (d) => y(d.where) + 11)
+    .attr('alignment-baseline', 'middle')
+    .attr('text-anchor', (d) => (d.pct > 0 ? 'end' : 'start'))
+    .attr('fill', (d) => colors[d.where]);
 
   // TODO
   // do the same thing with the text as above ^
