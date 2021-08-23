@@ -625,17 +625,28 @@ const makePlot = (mapData, data) => {
   svg.selectAll('.census2020-barOptions-eth').attr('fill-opacity', 0);
 
   let i = 0;
-  const playButtonInterval = setInterval(() => {
-    ++i;
-    if (i === mapOptions.length) {
-      i = 0;
+  let playButtonInterval = null;
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      setTimeout(() => {
+        clearInterval(playButtonInterval);
+        playButtonInterval = setInterval(() => {
+          ++i;
+          if (i === mapOptions.length) {
+            i = 0;
+          }
+          buttons
+            .filter((d, j) => j === i)
+            .each(function (d) {
+              selectMapOption(this, d);
+            });
+        }, 5000);
+      }, 5000);
+    } else {
+      clearInterval(playButtonInterval);
     }
-    buttons
-      .filter((d, j) => j === i)
-      .each(function (d) {
-        selectMapOption(this, d);
-      });
-  }, 5000);
+  });
 
   buttons.on('click', (event, d) => {
     clearInterval(playButtonInterval);
