@@ -12,6 +12,7 @@ import * as d3Collection from 'd3-collection';
 // import makeCbgs2010 from './cbgs2010';
 import makeCbs from './cbs';
 import makeLinePlot from './linePlot';
+import makeLinePlots from './linePlots';
 import makeHousingPlot from './housingPlot';
 // import makeCbs2010 from './cbs2010';
 
@@ -185,8 +186,10 @@ import makeHousingPlot from './housingPlot';
   const resize = () => {
     // makeCbgs(map, data2010p1);
     makeCbs(mapBlocks, data2020p1);
-    makeLinePlot(lineData);
+    // makeLinePlot(lineData);
+    makeLinePlots(lineData);
     makeHousingPlot(housingData);
+
     // makeCbgs2010(map2010, data2010p1);
     // makeCbs2010(mapBlocks2010, data2010p1);
   };

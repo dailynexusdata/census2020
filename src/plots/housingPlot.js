@@ -99,7 +99,8 @@ const housingPlot = (unsortedData) => {
     .attr('x', (d) => (d.pct < 0 ? x(d.pct) : x(0)))
     .attr('y', (d) => y(d.where))
     .attr('height', 20)
-    .attr('width', (d) => Math.abs(x(d.pct) - x(0)));
+    .attr('width', (d) => Math.abs(x(d.pct) - x(0)))
+    .attr('fill', (d) => colors[d.where]);
   // add a 'fill' attr to the bars to color them with the `colors` object ^
 
   // attributes can take either a value, like above I pass in 20 for the height
