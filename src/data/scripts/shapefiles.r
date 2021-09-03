@@ -546,14 +546,31 @@ ivdata%>%
     asian=P0010006,
     other=P0010008
   ) %>%
-  filter(city != "goleta") %>%
+  filter(city == "iv") %>%
 #  group_by(city) %>%
   summarise(
     white = sum(white)/sum(P0010001),
     black = sum(black)/sum(P0010001),
     asian = sum(asian)/sum(P0010001),
     other = sum(other)/sum(P0010001),
+    hisp=sum(P0020002)/sum(P0020001)
+  ) %>%
+  mutate(
+    more2 = 1 - white - black - asian - other,
+    nhisp = 1 - hisp
+  ) %>%
+  select(
+    white, asian, black, other, more2, hisp, nhisp
+  ) %>%
+  gather(key="race", value="pct") %>%
+  mutate(
+    start = c(0, cumsum(pct)[-length(pct)]),
+    end = c(cumsum(pct))
   )
+
+ivdata %>%
+  select(city) %>%
+  unique()
 
 bgvals.p1 %>%
   filter(LOGRECNO == countyLogRec) %>%

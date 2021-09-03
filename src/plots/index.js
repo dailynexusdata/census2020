@@ -11,16 +11,22 @@ import * as d3Collection from 'd3-collection';
 // import makeCbgs from './cbgs';
 // import makeCbgs2010 from './cbgs2010';
 import makeCbs from './cbs';
-import makeLinePlot from './linePlot';
+// import makeLinePlot from './linePlot';
 import makeLinePlots from './linePlots';
-import makeHousingPlot from './housingPlot';
+// import makeHousingPlot from './housingPlot';
 // import makeCbs2010 from './cbs2010';
 
 (async () => {
-  const mapBlocks = await d3.json('dist/data/ivblocks.json');
+  const mapBlocks = await d3.json(
+    // 'dist/data/ivblocks.json'
+    'https://raw.githubusercontent.com/dailynexusdata/census2020/main/dist/data/ivblocks.json',
+  );
   // const mapBlocks2010 = await d3.json('dist/data/ivblocks2010.json');
   // const data2010p1 = await d3.csv('dist/data/ivDataP1.csv');
-  const data2020p1 = await d3.csv('dist/data/ivData2020P1.csv');
+  const data2020p1 = await d3.csv(
+    // 'dist/data/ivData2020P1.csv'
+    'https://raw.githubusercontent.com/dailynexusdata/census2020/main/dist/data/ivData2020P1.csv',
+  );
 
   const lineData = d3Collection
     .nest()
@@ -188,7 +194,7 @@ import makeHousingPlot from './housingPlot';
     makeCbs(mapBlocks, data2020p1);
     // makeLinePlot(lineData);
     makeLinePlots(lineData);
-    makeHousingPlot(housingData);
+    // makeHousingPlot(housingData);
 
     // makeCbgs2010(map2010, data2010p1);
     // makeCbs2010(mapBlocks2010, data2010p1);

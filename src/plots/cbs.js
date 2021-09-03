@@ -1,12 +1,13 @@
 import * as d3 from 'd3';
-import { map } from 'd3';
 
 const makePlot = (mapData, data) => {
   const container = d3.select('#census-cbs2020');
   container.selectAll('*').remove();
 
-  container.append('h1').text('IV and UCSB Demographics 2020');
-  container.append('p').text('Race alone');
+  container.append('h1').text('I.V. and UCSB Demographics 2020');
+  container
+    .append('p')
+    .text('Demographics on the census block level for race and ethnicity separately.');
   const size = {
     height: Math.min(350, window.innerWidth - 40 * 2),
     width: Math.min(600, window.innerWidth - 40),
@@ -46,16 +47,14 @@ const makePlot = (mapData, data) => {
       '<p>Source: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.2020.html#P1">United States 2020 Census Redistricting Data.</a></p>',
     );
 
-  const proj = d3
-    .geoMercator()
-    .fitSize([size.width - 10, size.height], mapData);
+  const proj = d3.geoMercator().fitSize([size.width - 10, size.height], mapData);
 
   const projection = d3
     .geoMercator()
     .scale(proj.scale())
     .translate([proj.translate()[0] + 5, proj.translate()[1]]);
 
-  // .scale(700000)
+  // .scale(1000000)
   // .rotate([119.8626, -34.41768])
   // .translate([257, 200]);
 
@@ -87,7 +86,7 @@ const makePlot = (mapData, data) => {
   const cityLabs = {
     ucsb: 'UCSB',
     iv: 'Isla Vista',
-    goleta: 'Goleta',
+    goleta: 'Part of Goleta',
   };
   const raceColors = {
     white: 'rgb(43,122,185)',
@@ -130,9 +129,7 @@ const makePlot = (mapData, data) => {
   };
 
   const getMaxKey = (d) => {
-    const maxVal = d3.max(
-      ['asian', 'black', 'hisp', 'other', 'white'].map((k) => +d[k]),
-    );
+    const maxVal = d3.max(['asian', 'black', 'hisp', 'other', 'white'].map((k) => +d[k]));
 
     const meetsThresh = (x) => Math.abs(+x - maxVal) < 0.0001;
     if (meetsThresh(d.asian)) {
@@ -154,17 +151,13 @@ const makePlot = (mapData, data) => {
     if (d.properties.city === 'goleta') {
       return '#ffffffff';
     }
-    const [race, val] = getMaxKey(
-      data.find((d1) => d1.fips === d.properties.GEOID20),
-    );
+    const [race, val] = getMaxKey(data.find((d1) => d1.fips === d.properties.GEOID20));
 
     if (race === 'other') {
       return '#ffffffff';
     }
 
-    return d3.scaleSequential(getColorScale(race)).domain(getDomain(race))(
-      val / 100,
-    );
+    return d3.scaleSequential(getColorScale(race)).domain(getDomain(race))(val / 100);
   };
 
   const cbs = svg
@@ -228,6 +221,82 @@ const makePlot = (mapData, data) => {
   //   cb.raise();
   // });
 
+  const overviewLabels = svg.append('g');
+
+  overviewLabels
+    .append('text')
+    .text('Census Block')
+    .attr('x', size.width - 160)
+    .attr('y', 14)
+    .style('pointer-events', 'none');
+
+  overviewLabels
+    .append('text')
+    .text('Majority Demographic')
+    .attr('x', size.width - 160)
+    .attr('y', 28)
+    .style('pointer-events', 'none');
+
+  overviewLabels
+    .append('text')
+    .text('White')
+    .attr('x', size.width - 100)
+    .attr('y', 44)
+    .style('pointer-events', 'none');
+
+  overviewLabels
+    .append('text')
+    .text('Asian')
+    .attr('x', size.width - 100)
+    .attr('y', 44 + 14)
+    .style('pointer-events', 'none');
+
+  overviewLabels
+    .append('text')
+    .text('Black')
+    .attr('x', size.width - 100)
+    .attr('y', 44 + 28)
+    .style('pointer-events', 'none');
+
+  overviewLabels
+    .append('text')
+    .text('Hispanic')
+    .attr('x', size.width - 100)
+    .attr('y', 44 + 42)
+    .style('pointer-events', 'none');
+
+  overviewLabels
+    .append('rect')
+    .attr('width', 10)
+    .attr('height', 10)
+    .attr('x', size.width - 115)
+    .attr('y', 44 - 10)
+    .attr('fill', raceColors.white);
+
+  overviewLabels
+    .append('rect')
+    .attr('width', 10)
+    .attr('height', 10)
+    .attr('x', size.width - 115)
+    .attr('y', 44 - 10 + 14)
+    .attr('fill', raceColors.asian);
+
+  overviewLabels
+    .append('rect')
+    .attr('width', 10)
+    .attr('height', 10)
+    .attr('x', size.width - 115)
+    .attr('y', 44 - 10 + 28)
+    .attr('fill', raceColors.black);
+
+  overviewLabels
+    .append('rect')
+    .attr('width', 10)
+    .attr('height', 10)
+    .attr('x', size.width - 115)
+    .attr('y', 44 - 10 + 42)
+    .attr('fill', raceColors.hisp);
+
   const tooltip = hoverArea
     .append('div')
     .style('display', 'none')
@@ -280,9 +349,7 @@ const makePlot = (mapData, data) => {
         .style('left', `${Math.min(mouseX, size.width - width)}px`)
         .style('top', `${mouseY}px`)
         .html(
-          `<h3>Part of ${cityName}</h3><hr style="margin: 3px 0;"/>${Object.entries(
-            pt,
-          )
+          `<h3>Part of ${cityName}</h3><hr style="margin: 3px 0;"/>${Object.entries(pt)
             .slice(2)
             .map(([lab, val]) => makeToolTipLabel(lab, val))
             .join('')}`,
@@ -295,10 +362,7 @@ const makePlot = (mapData, data) => {
   });
 
   Object.entries(cityLabs).forEach(([abbr, label]) => {
-    const entry = legend
-      .append('div')
-      .style('display', 'flex')
-      .style('margin', '5px 10px');
+    const entry = legend.append('div').style('display', 'flex').style('margin', '5px 10px');
 
     entry
       .append('div')
@@ -308,15 +372,7 @@ const makePlot = (mapData, data) => {
     entry.append('p').text(label).style('margin-left', '5px');
   });
 
-  const mapOptions = [
-    'overview',
-    'white',
-    'black',
-    'asian',
-    'other',
-    'hisp',
-    'cities',
-  ];
+  const mapOptions = ['overview', 'white', 'asian', 'black', 'other', 'hisp', 'cities'];
 
   const selectMapOption = (event, d) => {
     selector.selectAll('*').style('background-color', 'white');
@@ -325,12 +381,9 @@ const makePlot = (mapData, data) => {
     svg.selectAll('.raceBarLabels').attr('fill-opacity', 0);
     scaleContainer.selectAll('*').remove();
 
-    svg.selectAll('.census-centroid-group').attr('fill-opacity', 0);
-    svg.selectAll('.census-centroid-group').attr('stroke-opacity', 0);
-
-    svg
-      .selectAll(`#census2020-raceLabel-${d.toLowerCase()}`)
-      .attr('fill-opacity', 1);
+    svg.selectAll(`#census2020-raceLabel-${d.toLowerCase()}`).attr('fill-opacity', 1);
+    overviewLabels.attr('fill-opacity', 0);
+    overviewLabels.attr('stroke-opacity', 0);
 
     if (d === 'cities') {
       cbs
@@ -340,17 +393,14 @@ const makePlot = (mapData, data) => {
 
       svg.selectAll('#census2020-raceLabel-more2').attr('fill-opacity', 1);
     } else if (d === 'overview') {
-      svg.selectAll('.census-centroid-group').attr('fill-opacity', 1);
-      svg.selectAll('.census-centroid-group').attr('stroke-opacity', 1);
+      overviewLabels.attr('fill-opacity', 1);
+      overviewLabels.attr('stroke-opacity', 1);
       cbs.transition().duration(1000).attr('fill', fillOverview);
     } else {
       const dom = getDomain(d);
       const colScale = d3.scaleSequential(getColorScale(d)).domain(dom);
 
-      const scale = scaleContainer
-        .append('svg')
-        .attr('width', size.width)
-        .attr('height', 40);
+      const scale = scaleContainer.append('svg').attr('width', size.width).attr('height', 40);
 
       const axisX = d3
         .scaleLinear()
@@ -370,12 +420,14 @@ const makePlot = (mapData, data) => {
 
       scale
         .append('text')
+        .attr('pointer-events', 'none')
         .text('% of census block population')
         .attr('x', 15)
         .attr('y', '12');
 
       scale
         .append('text')
+        .attr('pointer-events', 'none')
         .text(`${dom[0] * 100}%`)
         .attr('x', axisX(dom[0]) - 5)
         .attr('y', 35)
@@ -384,6 +436,7 @@ const makePlot = (mapData, data) => {
 
       scale
         .append('text')
+        .attr('pointer-events', 'none')
         .text(`${dom[1] * 100}%`)
         .attr('x', axisX(dom[1]) + 5)
         .attr('y', 35)
@@ -433,9 +486,7 @@ const makePlot = (mapData, data) => {
     .style('border-radius', '10px')
     .style('margin', '5px')
     .style('cursor', 'pointer')
-    .style('background-color', (d) =>
-      d === 'cities' ? '#d3d3d344' : '#ffffff',
-    );
+    .style('background-color', (d) => (d === 'cities' ? '#d3d3d344' : '#ffffff'));
 
   // const campusPoint = projection([-119.8444, 34.40416]);
   // svg
@@ -454,10 +505,7 @@ const makePlot = (mapData, data) => {
   const y = d3
     .scaleBand()
     .domain(['iv', 'ucsb'])
-    .range([
-      size.height + margin.top,
-      size.height + barsSize.height - margin.bottom,
-    ])
+    .range([size.height + margin.top, size.height + barsSize.height - margin.bottom])
     .paddingInner(0.75);
 
   const x = d3.scaleLinear().range([margin.left, size.width - margin.right]);
@@ -465,84 +513,84 @@ const makePlot = (mapData, data) => {
   const barData = [
     {
       x1: 0,
-      x2: 0.482,
+      x2: 0.4821935,
       y: 'iv',
       name: 'white',
     },
     {
-      x1: 0.482,
-      x2: 0.5041,
+      x1: 0.6916774,
+      x2: 0.7138065,
       y: 'iv',
       name: 'black',
     },
     {
-      x1: 0.5041,
-      x2: 0.7131,
+      x1: 0.4821935,
+      x2: 0.6916774,
       y: 'iv',
       name: 'asian',
     },
     {
-      x1: 0.7131,
-      x2: 0.8401,
+      x1: 0.7138065,
+      x2: 0.8410323,
       y: 'iv',
       name: 'other',
     },
     {
-      x1: 0.8401,
+      x1: 0.8410323,
       x2: 1,
       y: 'iv',
       name: 'more2',
     },
     {
       x1: 0,
-      x2: 0.459,
+      x2: 0.4588054,
       y: 'ucsb',
       name: 'white',
     },
     {
-      x1: 0.459,
-      x2: 0.4715,
-      y: 'ucsb',
-      name: 'black',
-    },
-    {
-      x1: 0.4715,
-      x2: 0.8485,
+      x1: 0.4588054,
+      x2: 0.8360453,
       y: 'ucsb',
       name: 'asian',
     },
     {
-      x1: 0.8485,
-      x2: 0.9276,
+      x1: 0.8360453,
+      x2: 0.8485067,
+      y: 'ucsb',
+      name: 'black',
+    },
+    {
+      x1: 0.8485067,
+      x2: 0.9276004,
       y: 'ucsb',
       name: 'other',
     },
     {
-      x1: 0.9276,
+      x1: 0.9276004,
       x2: 1,
       y: 'ucsb',
       name: 'more2',
     },
     {
       x1: 0,
-      x2: 0.727,
+      x2: 0.72651613,
       y: 'iv',
       name: 'nothisp',
     },
     {
-      x1: 0.727,
+      x1: 0.72651613,
       x2: 1,
       y: 'iv',
       name: 'hisp',
     },
     {
       x1: 0,
-      x2: 0.809,
+      x2: 0.80875386,
       y: 'ucsb',
       name: 'nothisp',
     },
     {
-      x1: 0.809,
+      x1: 0.80875386,
       x2: 1,
       y: 'ucsb',
       name: 'hisp',
@@ -564,17 +612,20 @@ const makePlot = (mapData, data) => {
 
   svg
     .append('text')
+    .attr('pointer-events', 'none')
     .text('UCSB')
     .attr('x', x(0))
     .attr('y', y('ucsb') - 2);
   svg
     .append('text')
+    .attr('pointer-events', 'none')
     .text('Isla Vista')
     .attr('x', x(0))
     .attr('y', y('iv') - 2);
 
   svg
     .append('text')
+    .attr('pointer-events', 'none')
     .text('Overall area makeup')
     .attr('font-size', '16pt')
     .attr('x', x(0))
@@ -586,11 +637,7 @@ const makePlot = (mapData, data) => {
     .join((enter) => {
       enter
         .append('rect')
-        .attr(
-          'class',
-          (d) =>
-            `census2020-barOptions-${d.name.includes('hisp') ? 'eth' : 'race'}`,
-        )
+        .attr('class', (d) => `census2020-barOptions-${d.name.includes('hisp') ? 'eth' : 'race'}`)
         .attr('x', (d) => x(d.x1))
         .attr('width', (d) => x(d.x2) - x(d.x1))
         .attr('y', (d) => y(d.y))
@@ -603,10 +650,8 @@ const makePlot = (mapData, data) => {
         .attr('id', (d) => `census2020-raceLabel-${d.name}`)
         .attr('x', (d) => (x(d.x2) + x(d.x1)) / 2)
         .attr('y', (d) => y(d.y) - 9)
-        .text(
-          (d) =>
-            `${`${raceLabels[d.name]}: ${Math.round((d.x2 - d.x1) * 100)}`}%`,
-        )
+        .attr('pointer-events', 'none')
+        .text((d) => `${`${raceLabels[d.name]}: ${Math.round((d.x2 - d.x1) * 100)}`}%`)
         .attr('text-anchor', 'middle')
         .attr('fill-opacity', (d) => (d.name === 'more2' ? 1 : 0));
 
@@ -615,11 +660,7 @@ const makePlot = (mapData, data) => {
         .attr('class', 'raceBarLabels')
         .attr('id', (d) => `census2020-raceLabel-${d.name}`)
         .attr('d', triangle)
-        .attr(
-          'transform',
-          (d) =>
-            `translate(${(x(d.x2) + x(d.x1)) / 2},${y(d.y) - 5}) rotate(180)`,
-        )
+        .attr('transform', (d) => `translate(${(x(d.x2) + x(d.x1)) / 2},${y(d.y) - 5}) rotate(180)`)
         .attr('fill-opacity', (d) => (d.name === 'more2' ? 1 : 0));
     });
   svg.selectAll('.census2020-barOptions-eth').attr('fill-opacity', 0);
@@ -627,26 +668,32 @@ const makePlot = (mapData, data) => {
   let i = 0;
   let playButtonInterval = null;
 
+  const startCycle = () => {
+    clearInterval(playButtonInterval);
+    setTimeout(() => {
+      playButtonInterval = setInterval(() => {
+        ++i;
+        if (i === mapOptions.length) {
+          i = 0;
+        }
+        buttons
+          .filter((d, j) => j === i)
+          .each(function (d) {
+            selectMapOption(this, d);
+          });
+      }, 5000);
+    }, 5000);
+  };
+
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      setTimeout(() => {
-        clearInterval(playButtonInterval);
-        playButtonInterval = setInterval(() => {
-          ++i;
-          if (i === mapOptions.length) {
-            i = 0;
-          }
-          buttons
-            .filter((d, j) => j === i)
-            .each(function (d) {
-              selectMapOption(this, d);
-            });
-        }, 5000);
-      }, 5000);
+      startCycle();
     } else {
       clearInterval(playButtonInterval);
     }
   });
+
+  startCycle();
 
   buttons.on('click', (event, d) => {
     clearInterval(playButtonInterval);

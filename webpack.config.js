@@ -5,12 +5,12 @@ require('dotenv').config();
 const config = {
   entry: './src/plots/index.js',
   output: {
-    filename: `${process.env.NAME}-bundle.js`,
+    filename: 'census2020-bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
   plugins: [
     new HtmlWebpackPlugin({
-      name: process.env.NAME,
+      name: 'census2020',
       filename: '../index.html',
       template: 'src/plots/index.ejs',
     }),

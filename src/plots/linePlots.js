@@ -105,9 +105,8 @@ const singlePlot = (div, data, color, label, key) => {
         // .attr('fill-opacity', (d) => (d.values[0].where === 'sb' ? 0.3 : 1))
         .attr(
           'y',
-          (d) =>
-            y(d.values[0].val) +
-            (key !== 'more2'
+          (d) => y(d.values[0].val)
+            + (key !== 'more2'
               ? yOffset[+(d.values[1].where === 'sb')]
               : -5 * +(d.values[1].where === 'sb')),
         );
@@ -168,12 +167,14 @@ const makeLegend = (div) => {
 };
 
 const makePlot = (data) => {
-  const container = d3.select('#census-linePlot2020');
+  const container = d3
+    .select('#census-linePlot2020')
+    .style('max-width', `${size.width * 3}px`);
   container.selectAll('*').remove();
 
   container
     .append('h1')
-    .text('Changes in IV and UCSB Demographics 2010-2020')
+    .text('Changes in I.V. and UCSB Demographics 2010-2020')
     .style('font-size', '20pt');
   // container
   //   .append('p')
